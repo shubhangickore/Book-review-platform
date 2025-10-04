@@ -1,0 +1,58 @@
+/* src/pages/AddEditBook.css */
+.form-container {
+  max-width: 500px;
+  margin: 2em auto;
+  background-color: #fff;
+  padding: 2em;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.book-form .form-group {
+  margin-bottom: 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-form label {
+  margin-bottom: 0.3em;
+  font-weight: 600;
+}
+
+.book-form input, 
+.book-form textarea {
+  padding: 0.5em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.book-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.submit-btn {
+  background-color: #2ecc71;
+  color: #fff;
+  padding: 0.6em 1.2em;
+  border-radius: 5px;
+  font-size: 1em;
+  margin-top: 1em;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.preview {
+  margin-top: 1em;
+  text-align: center;
+}
+
+.preview img {
+  width: 150px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 5px;
+}

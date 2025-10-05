@@ -45,3 +45,17 @@ PORT=5000
 ## Run The App
 npm run dev
 
+## 📸 Project Screenshots
+
+### 🏠 Home Page
+![Home Page](./screenshots/home.png)
+
+### 🔐 Login Page
+![Login Page](./screenshots/Login.png)
+
+### 🔐 Signup Page
+![Signup Page](./screenshots/signup.png)
+
+### 📚Add-Book Page
+![Add-Book Page](./screenshots/add-book.png)
+

@@ -48,14 +48,14 @@ npm run dev
 ## 📸 Project Screenshots
 
 ### 🏠 Home Page
-![Home Page](Frontend/screenshots/home.png)
+![Home Page](frontend/screenshots/home.png)
 
 ### 🔐 Login Page
-![Login Page](Frontend/screenshots/Login.png)
+![Login Page](frontend/screenshots/Login.png)
 
 ### 🔐 Signup Page
-![Signup Page](Frontend/screenshots/signup.png)
+![Signup Page](frontend/screenshots/signup.png)
 
 ### 📚Add-Book Page
-![Add-Book Page](Frontend/screenshots/add-book.png)
+![Add-Book Page](frontend/screenshots/add-book.png)
 

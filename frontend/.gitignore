@@ -21,4 +21,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-//
+//PORT=5000
+JWT_SECRET=mySuperSecretKey123
+MONGODB_URI=mongodb+srv://koreshubhangi291_db_user:RpADyxBTAdRq2ASe@cluster0.vhxstxm.mongodb.net/BookDB?retryWrites=true&w=majority&appName=Cluster0
+

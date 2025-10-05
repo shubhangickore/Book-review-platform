@@ -1,44 +1,41 @@
-import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import "./Navbar.css";
 
-const Navbar = () => {
+function Navbar({ darkMode, setDarkMode }) {
   const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-logo">
-        <Link to="/">BookApp</Link>
+    <nav className={`navbar ${darkMode ? "dark" : "light"}`}>
+      <div className="nav-left">
+        <h2 className="logo">📚 Book Management</h2>
+        <Link to="/">Home</Link>
+        {user && <Link to="/add-book">Add Book</Link>}
       </div>
-      <div className="navbar-links">
-        {user ? (
+
+      <div className="nav-right">
+        {!user ? (
           <>
-            <Link to="/">Home</Link>
-            <Link to="/add-book">Add Book</Link>
-            <button className="btn" onClick={handleLogout}>
-              Logout
-            </button>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
           </>
         ) : (
-          <>
-            <Link to="/login" className="btn">
-              Login
-            </Link>
-            <Link to="/signup" className="btn">
-              Signup
-            </Link>
-          </>
+          <button onClick={logout} className="logout-btn">
+            Logout
+          </button>
         )}
+
+        {/* Dark/Light mode toggle */}
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="theme-toggle"
+        >
+          {darkMode ? "☀️ Light" : "🌙 Dark"}
+        </button>
       </div>
     </nav>
   );
-};
+}
 
 export default Navbar;

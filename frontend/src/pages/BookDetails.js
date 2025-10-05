@@ -11,47 +11,68 @@ export default function BookDetails() {
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(5);
-  const [reviewText, setReviewText] = useState("");
+  const [text, setText] = useState("");
   const [editingReview, setEditingReview] = useState(null);
 
+  // Fetch book details
   const fetchBook = async () => {
-    const res = await API.get(`/books/${id}`);
-    setBook(res.data);
+    try {
+      const res = await API.get(`/books/${id}`);
+      setBook(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // Fetch reviews and avg rating
   const fetchReviews = async () => {
-    const res = await API.get(`/reviews/book/${id}`);
-    setReviews(res.data);
+    try {
+      const res = await API.get(`/reviews/book/${id}`);
+      setReviews(res.data.reviews);
+      if (book) setBook({ ...book, averageRating: res.data.avgRating });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const addReview = async () => {
-    if (!reviewText) return alert("Review cannot be empty");
-    if (editingReview) {
-      await API.put(`/reviews/${editingReview._id}`, { rating, reviewText });
-      setEditingReview(null);
-    } else {
-      await API.post(`/reviews/${id}`, { rating, reviewText });
+    if (!text.trim()) return alert("Review cannot be empty");
+
+    try {
+      if (editingReview) {
+        await API.put(`/reviews/${editingReview._id}`, { rating, text });
+        setEditingReview(null);
+      } else {
+        await API.post(`/reviews/${id}`, { rating, text });
+      }
+      setText("");
+      setRating(5);
+      fetchReviews(); // refresh reviews and avg rating
+    } catch (err) {
+      console.error(err);
     }
-    setReviewText("");
-    setRating(5);
-    fetchReviews();
   };
 
   const editReview = (review) => {
     setEditingReview(review);
-    setReviewText(review.reviewText);
+    setText(review.text);
     setRating(review.rating);
   };
 
   const deleteReview = async (reviewId) => {
     if (!window.confirm("Delete this review?")) return;
-    await API.delete(`/reviews/${reviewId}`);
-    fetchReviews();
+    try {
+      await API.delete(`/reviews/${reviewId}`);
+      fetchReviews();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
     fetchBook();
     fetchReviews();
+    // eslint-disable-next-line
   }, [id]);
 
   if (!book) return <div>Loading...</div>;
@@ -69,7 +90,7 @@ export default function BookDetails() {
           <div className="flex space-x-2 mt-2">
             <select
               value={rating}
-              onChange={(e) => setRating(e.target.value)}
+              onChange={(e) => setRating(Number(e.target.value))}
               className="border p-1 rounded"
             >
               {[1, 2, 3, 4, 5].map((r) => (
@@ -77,8 +98,8 @@ export default function BookDetails() {
               ))}
             </select>
             <input
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
               placeholder="Write your review..."
               className="border p-1 rounded flex-1"
             />
@@ -95,10 +116,10 @@ export default function BookDetails() {
         {reviews.map((r) => (
           <div key={r._id} className="border p-2 mt-2 rounded flex justify-between items-start">
             <div>
-              <p className="font-medium">{r.user.name} - Rating: {r.rating}</p>
-              <p>{r.reviewText}</p>
+              <p className="font-medium">{r.userId.name} - Rating: {r.rating}</p>
+              <p>{r.text}</p>
             </div>
-            {user && r.user._id === user._id && (
+            {user && r.userId._id === user._id && (
               <div className="flex space-x-2">
                 <button onClick={() => editReview(r)} className="text-green-600 hover:underline">Edit</button>
                 <button onClick={() => deleteReview(r._id)} className="text-red-600 hover:underline">Delete</button>

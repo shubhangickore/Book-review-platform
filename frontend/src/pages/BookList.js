@@ -1,4 +1,3 @@
-// src/pages/BookList.js
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -6,18 +5,23 @@ import "./BookList.css";
 
 function BookList() {
   const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch books from backend
-  const fetchBooks = async () => {
+  const fetchBooks = async (pageNumber = 1) => {
     try {
-      const res = await axios.get("http://localhost:5000/api/books");
-      const booksArray = Array.isArray(res.data) ? res.data : res.data.books;
-      setBooks(booksArray || []);
+      setLoading(true);
+      const res = await axios.get(`http://localhost:5000/api/books?page=${pageNumber}`);
+      setBooks(res.data.books);
+      setFilteredBooks(res.data.books);
+      setPage(res.data.page);
+      setPages(res.data.pages);
     } catch (err) {
-      console.error("Error fetching books:", err);
-      setError("Failed to load books.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -27,32 +31,78 @@ function BookList() {
     fetchBooks();
   }, []);
 
-  const handleDelete = async (bookId) => {
+  // Delete a book (only if creator)
+  const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this book?");
     if (!confirmDelete) return;
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/books/${bookId}`, {
+      await axios.delete(`http://localhost:5000/api/books/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Remove deleted book from state
-      setBooks(books.filter((book) => book._id !== bookId));
+      setBooks(books.filter((b) => b._id !== id));
+      setFilteredBooks(filteredBooks.filter((b) => b._id !== id));
     } catch (err) {
-      console.error("Failed to delete book:", err);
-      alert("Failed to delete book. Make sure you are the creator.");
+      alert("Cannot delete book. Only the creator can delete it.");
+      console.error(err);
     }
   };
 
+  // Handle search (filters locally)
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (!query) {
+      setFilteredBooks(books);
+      return;
+    }
+
+    const filtered = books.filter(
+      (b) =>
+        b.title.toLowerCase().includes(query) ||
+        b.author.toLowerCase().includes(query) ||
+        (b.genre && b.genre.toLowerCase().includes(query))
+    );
+    setFilteredBooks(filtered);
+  };
+
   if (loading) return <p>Loading books...</p>;
-  if (error) return <p>{error}</p>;
-  if (books.length === 0) return <p>No books available. Add one!</p>;
+  if (filteredBooks.length === 0)
+    return (
+      <div className="book-list-container">
+        <div className="search-bar-container">
+          <input
+            type="text"
+            placeholder="🔍 Search books by title, author, or genre..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="search-bar"
+          />
+        </div>
+        <p>No books available.</p>
+      </div>
+    );
 
   return (
     <div className="book-list-container">
       <h1>All Books</h1>
+
+      {/* 🔍 Search Bar */}
+      <div className="search-bar-container">
+        <input
+          type="text"
+          placeholder="🔍 Search books by title, author, or genre..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="search-bar"
+        />
+      </div>
+
+      {/* 📚 Book Grid */}
       <div className="books-grid">
-        {books.map((book) => (
+        {filteredBooks.map((book) => (
           <div className="book-card" key={book._id}>
             <img
               src={book.coverImage || "https://via.placeholder.com/150"}
@@ -60,7 +110,10 @@ function BookList() {
               className="book-cover"
             />
             <h3>{book.title}</h3>
-            <p>Author: {book.author}</p>
+            <p><strong>Author:</strong> {book.author}</p>
+            <p>{book.description}</p>
+            {book.genre && <p><strong>Genre:</strong> {book.genre}</p>}
+
             <div className="card-buttons">
               <Link to={`/edit-book/${book._id}`} className="edit-btn">
                 Edit
@@ -73,6 +126,19 @@ function BookList() {
               </button>
             </div>
           </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination">
+        {Array.from({ length: pages }, (_, i) => (
+          <button
+            key={i + 1}
+            className={page === i + 1 ? "active" : ""}
+            onClick={() => fetchBooks(i + 1)}
+          >
+            {i + 1}
+          </button>
         ))}
       </div>
     </div>

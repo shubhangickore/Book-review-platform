@@ -1,11 +1,15 @@
+import React from "react";
 import "./Footer.css";
 
-const Footer = () => {
+function Footer() {
   return (
-    <footer className="footer">
-      &copy; {new Date().getFullYear()} Book Review Platform. All rights reserved.
+    <footer className="app-footer">
+      <p>© 2025 Book Review Platform. All rights reserved.</p>
+      <p>
+        Made with ❤️ by Shubhangi
+      </p>
     </footer>
   );
-};
+}
 
 export default Footer;

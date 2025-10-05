@@ -1,30 +1,31 @@
-// src/pages/AddEditBook.js
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./AddEditBook.css";
 
-function AddEditBook({ books, setBooks }) {
+function AddEditBook() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [description, setDescription] = useState("");
+  const [genre, setGenre] = useState("");
+  const [year, setYear] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
       const fetchBook = async () => {
-        try {
-          const res = await axios.get(`http://localhost:5000/api/books/${id}`);
-          const book = res.data.book || res.data; 
-          setTitle(book.title);
-          setAuthor(book.author);
-          setCoverImage(book.coverImage || "");
-        } catch (err) {
-          console.error("Error fetching book:", err);
-        }
+        const res = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const book = res.data.book;
+        setTitle(book.title);
+        setAuthor(book.author);
+        setDescription(book.description);
+        setGenre(book.genre);
+        setYear(book.year);
+        setCoverImage(book.coverImage || "");
       };
       fetchBook();
     }
@@ -34,33 +35,23 @@ function AddEditBook({ books, setBooks }) {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem("token");
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-
     try {
       if (id) {
-        // Edit book
-        const res = await axios.put(
+        await axios.put(
           `http://localhost:5000/api/books/${id}`,
-          { title, author, coverImage },
-          config
-        );
-        // Update book in books array
-        setBooks(
-          books.map((b) => (b._id === id ? res.data : b))
+          { title, author, description, genre, year, coverImage },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
-        // Add new book
-        const res = await axios.post(
+        await axios.post(
           "http://localhost:5000/api/books",
-          { title, author, coverImage },
-          config
+          { title, author, description, genre, year, coverImage },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        // Add book to state
-        setBooks([res.data, ...books]);
       }
-      navigate("/"); // go back to home
+      navigate("/");
     } catch (err) {
-      console.error("Error saving book:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -68,50 +59,15 @@ function AddEditBook({ books, setBooks }) {
 
   return (
     <div className="form-container">
-      <h2>{id ? "Edit Book" : "Add New Book"}</h2>
+      <h2>{id ? "Edit Book" : "Add Book"}</h2>
       <form onSubmit={handleSubmit} className="book-form">
-        <div className="form-group">
-          <label>Title</label>
-          <input
-            type="text"
-            placeholder="Enter title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Author</label>
-          <input
-            type="text"
-            placeholder="Enter author"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Cover Image URL</label>
-          <input
-            type="text"
-            placeholder="Enter cover image link"
-            value={coverImage}
-            onChange={(e) => setCoverImage(e.target.value)}
-          />
-        </div>
-
-        {coverImage && (
-          <div className="preview">
-            <p>Preview:</p>
-            <img src={coverImage} alt="Preview" />
-          </div>
-        )}
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Saving..." : id ? "Update Book" : "Add Book"}
-        </button>
+        <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
+        <input type="text" placeholder="Author" value={author} onChange={e => setAuthor(e.target.value)} required />
+        <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
+        <input type="text" placeholder="Genre" value={genre} onChange={e => setGenre(e.target.value)} />
+        <input type="number" placeholder="Published Year" value={year} onChange={e => setYear(e.target.value)} />
+        <input type="text" placeholder="Cover Image URL" value={coverImage} onChange={e => setCoverImage(e.target.value)} />
+        <button type="submit" disabled={loading}>{loading ? "Saving..." : id ? "Update" : "Add"}</button>
       </form>
     </div>
   );

@@ -1,30 +1,29 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import "../styles/auth.css";
 
-
 function Signup() {
+  const { signup } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!name || !email || !password) {
       setError("All fields are required");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/signup", { name, email, password });
-      navigate("/login");
+      await signup(name, email, password); // use AuthContext
+      navigate("/"); // redirect to home after signup
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.message || "Error creating account");
     }
   };
@@ -32,14 +31,33 @@ function Signup() {
   return (
     <div className="auth-container">
       <h2>Create Account</h2>
+      {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-        <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Sign Up</button>
-        {error && <p className="error">{error}</p>}
       </form>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+      <p>
+        Already have an account? <Link to="/login">Login</Link>
+      </p>
     </div>
   );
 }
